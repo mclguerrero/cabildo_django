@@ -1,0 +1,32 @@
+{% extends 'bases/card.html' %}
+{% block title %}Listado de Familias{% endblock %}
+{% block card_title %}Listado de Familias{% endblock %}
+{% block card_content %}
+<div class="mb-3">
+    <a href="{% url 'crear_familia' %}" class="btn btn-primary">Registrar Familia</a>
+</div>
+<table class="table table-hover fs-6 table-responsive miTabla table-bordered text-center">
+    <thead>
+        <tr>
+            <th class="text-center">Nombre Familia</th>
+            <th class="text-center">Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for familia in familias %}
+        <tr>
+            <td>{{ familia.n_familia }}</td>
+            <td>
+                <a href="{% url 'actualizar_familia' familia.pk %}" class="btn btn-warning btn-sm">Editar</a>
+                <a href="{% url 'eliminar_familia' familia.pk %}" class="btn btn-danger btn-sm">Eliminar</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
+{% block content %}
+  {% with container_class="container w-50" %}
+    {{ block.super }}
+  {% endwith %}
+{% endblock %}

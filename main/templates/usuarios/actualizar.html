@@ -1,0 +1,22 @@
+<!-- templates/usuarios/actualizar.html -->
+
+{% extends 'bases/card.html' %}
+{% block title %}Actualizar Usuario{% endblock %}
+{% block card_title %}Actualizar Usuario{% endblock %}
+{% block card_content %}
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <div class="d-grid gap-2 col-3 mx-auto pt-3 pb-3">
+    <div class="d-flex justify-content-center">
+      <button type="submit" class="btn btn-primary me-2">Actualizar</button>
+      <a class="btn btn-secondary" href="{% url 'listar_usuarios' %}">Cancelar</a>
+    </div>
+  </div>
+</form>
+{% endblock %}
+{% block content %}
+  {% with container_class="container w-50" %}
+    {{ block.super }}
+  {% endwith %}
+{% endblock %}

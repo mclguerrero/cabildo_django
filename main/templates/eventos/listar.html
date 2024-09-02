@@ -1,0 +1,45 @@
+
+{% extends 'bases/card.html' %}
+{% block title %}Listado de Eventos{% endblock %}
+{% block card_title %}Listado de Eventos{% endblock %}
+{% block card_content %}
+
+    <a href="{% url 'crear_evento' %}" class="btn btn-primary mb-3">Registrar Evento</a>
+    <table class="table table-hover fs-6 table-responsive miTabla table-bordered text-center">
+        <thead>
+            <tr>
+                <th class="text-center">Nombre</th>
+                <th class="text-center">Descripción</th>
+                <th class="text-center">Imagen</th>
+                <th class="text-center">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for evento in eventos %}
+            <tr>
+                <td>{{ evento.nombre }}</td>
+                <td>{{ evento.descripcion }}</td>
+                <td>
+                    {% if evento.imagen %}
+                    <img src="{{ evento.imagen.url }}" alt="{{ evento.nombre }}" width="100">
+                    {% else %}
+                    No hay imagen
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{% url 'actualizar_evento' evento.pk %}" class="btn btn-warning">Editar</a>
+                    <a href="{% url 'eliminar_evento' evento.pk %}" class="btn btn-danger">Eliminar</a>
+                    <a href="{% url 'listar_usuarios_por_evento'  evento.pk %}" class="btn btn-info">Ver Lista</a>
+                    <a href="{% url 'registrar_usuario_a_evento' evento.pk %}" class="btn btn-success">Registrar Usuario</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %} 
+{% block content %} 
+  {% with container_class="ms-5 me-5" %}
+    {{ block.super }} 
+  {% endwith %} 
+{% endblock %}

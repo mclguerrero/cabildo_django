@@ -1,0 +1,37 @@
+{% extends 'bases/card.html' %}
+{% block title %}Lista Asistencia{% endblock %}
+{% block card_title %}Lista Asistencia{% endblock %}
+{% block card_content %}
+
+<a href="{% url 'crear_usuario_evento' %}" class="btn btn-primary mb-3">Crear Relación Usuario-Evento</a>
+<table class="table table-hover fs-6 table-responsive miTabla table-bordered text-center">
+    <thead>
+            <tr>
+                <th class="text-center">Usuario</th>
+                <th class="text-center">Evento</th>
+                <th class="text-center">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for usuario_evento in usuarios_eventos %}
+            <tr>
+                <td>{{ usuario_evento.usuario }}</td>
+                <td>{{ usuario_evento.evento }}</td>
+                <td>
+                    <a href="{% url 'actualizar_usuario_evento' usuario_evento.pk %}" class="btn btn-warning">Editar</a>
+                    <form action="{% url 'eliminar_usuario_evento' usuario_evento.pk %}" method="post" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">Eliminar</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+{% endblock %} 
+{% block content %} 
+  {% with container_class="ms-5 me-5" %}
+    {{ block.super }} 
+  {% endwith %} 
+{% endblock %}

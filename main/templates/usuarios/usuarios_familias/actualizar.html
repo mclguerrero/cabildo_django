@@ -1,0 +1,17 @@
+{% extends 'bases/card.html' %}
+{% block title %}Actualizar Usuario-Familia{% endblock %}
+{% block card_title %}Actualizar Usuario-Familia{% endblock %}
+{% block card_content %}
+<form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Actualizar</button>
+</form>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>  <!-- jQuery -->
+{{ form.media.js }}  <!-- Incluye los scripts JS de Select2 -->
+{% endblock %}
+{% block content %}
+  {% with container_class="container w-50" %}
+    {{ block.super }}
+  {% endwith %}
+{% endblock %}

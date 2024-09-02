@@ -1,0 +1,30 @@
+{% extends 'bases/landing/base.html' %}
+
+{% block title %}GRAN PUTUMAYO LOS PASTOS{% endblock %}
+
+{% block content %}
+    <!-- Image Carousel -->
+    {% include 'bases/landing/carrusel.html' with eventos=eventos %}
+
+    <!-- Image Boxes in Grid -->
+    <div class="container my-4">
+        <div class="row">
+            {% for evento in eventos %}
+                <div class="col-md-4 mb-4">
+                    <a href="#" data-bs-toggle="modal" data-bs-target="#imageModal" 
+                       data-image="{{ evento.imagen.url }}" 
+                       data-title="{{ evento.nombre }}" 
+                       data-description="{{ evento.descripcion }}">
+                        <div class="image-box">
+                            <img src="{{ evento.imagen.url }}" alt="{{ evento.nombre }}" class="img-fluid">
+                        </div>
+                    </a>
+                </div>
+                {% if forloop.counter|divisibleby:3 and not forloop.last %}
+                    </div>
+                    <div class="row mt-4">
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

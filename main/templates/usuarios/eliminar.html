@@ -1,0 +1,18 @@
+<!-- templates/usuarios/eliminar.html -->
+
+{% extends 'bases/card.html' %}
+{% block title %}Eliminar Usuario{% endblock %}
+{% block card_title %}Eliminar Usuario{% endblock %}
+{% block card_content %}
+<form method="post">
+  {% csrf_token %}
+  <p>¿Estás seguro de que quieres eliminar el usuario "{{ usuario }}"?</p>
+  <button type="submit" class="btn btn-danger">Eliminar</button>
+  <a class="btn btn-secondary" href="{% url 'listar_usuarios' %}">Cancelar</a>
+</form>
+{% endblock %}
+{% block content %}
+  {% with container_class="container w-50" %}
+    {{ block.super }}
+  {% endwith %}
+{% endblock %}

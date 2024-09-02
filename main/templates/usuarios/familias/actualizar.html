@@ -1,0 +1,15 @@
+{% extends 'bases/card.html' %}
+{% block title %}Actualizar Familia{% endblock %}
+{% block card_title %}Actualizar Familia{% endblock %}
+{% block card_content %}
+<form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Actualizar</button>
+</form>
+{% endblock %}
+{% block content %}
+  {% with container_class="container w-50" %}
+    {{ block.super }}
+  {% endwith %}
+{% endblock %}

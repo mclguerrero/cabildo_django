@@ -1,0 +1,63 @@
+<!-- templates/usuarios/listar.html -->
+
+{% extends 'bases/card.html' %}
+{% block title %}Listado de Usuarios{% endblock %}
+{% block card_title %}Listado de Usuarios{% endblock %}
+{% block card_content %}
+<div class="mb-3">
+    <a href="{% url 'crear_usuario' %}" class="btn btn-primary">Registrar Usuario</a>
+</div>
+<table class="table table-hover fs-6 table-responsive miTabla table-bordered text-center">
+    <thead>
+        <tr>
+            <th class="text-center">#</th>
+            <th class="text-center">Familia</th> 
+            <th class="text-center">Numero Documento</th>
+            <th class="text-center">Nombres</th>
+            <th class="text-center">Apellidos</th>
+            <th class="text-center">Fecha Nacimiento</th>
+            <th class="text-center">Parentesco</th>
+            <th class="text-center">Genero</th>
+            <th class="text-center">Estado Civil</th>
+            <th class="text-center">Profesion</th>
+            <th class="text-center">Escolaridad</th>
+            <th class="text-center">Direccion</th>
+            <th class="text-center">Telefono</th>
+            <th class="text-center">Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for usuario in usuarios %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>
+                {% for uf in usuario.familias %}
+                    {{ uf.familia.n_familia }}{% if not forloop.last %}, {% endif %}
+                {% endfor %}
+            </td>
+            <td>{{ usuario.n_documento }}</td>
+            <td>{{ usuario.nombres }}</td>
+            <td>{{ usuario.apellidos }}</td>
+            <td>{{ usuario.fecha_nacimiento }}</td>
+            <td>{{ usuario.parentesco }}</td>
+            <td>{{ usuario.genero }}</td>
+            <td>{{ usuario.estadoCivil }}</td>
+            <td>{{ usuario.profesion }}</td>
+            <td>{{ usuario.escolaridad }}</td>
+            <td>{{ usuario.direccion }}</td>
+            <td>{{ usuario.telefono }}</td>
+            <td>
+                <a href="{% url 'ver_usuario' usuario.pk %}" class="btn btn-info btn-sm">Ver</a>
+                <a href="{% url 'actualizar_usuario' usuario.pk %}" class="btn btn-warning btn-sm">Editar</a>
+                <a href="{% url 'eliminar_usuario' usuario.pk %}" class="btn btn-danger btn-sm">Eliminar</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %} 
+{% block content %} 
+  {% with container_class="ms-5 me-5" %}
+    {{ block.super }} 
+  {% endwith %} 
+{% endblock %}
