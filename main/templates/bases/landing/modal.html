@@ -1,4 +1,4 @@
-<!-- bases/landing/card.html -->
+<!-- bases/landing/modal.html -->
 <div class="modal fade" id="imageModal" tabindex="-1" role="dialog" aria-labelledby="imageModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
@@ -7,10 +7,12 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <img id="modalImage" src="" alt="Imagen Ampliada" class="img-fluid">
+                <div class="text-center p-3"> 
+                    <img id="modalImage" src="" alt="Imagen Ampliada" class="img-fluid" style="max-width: 100%; max-height: 400px; object-fit: contain; border-radius: 15px;">
+                </div>
                 <div>
                     <h6>Descripción:</h6>
-                    <p id="eventDescription"></p>
+                    <p class="modal-description" id="eventDescription"></p> 
                 </div>
             </div>
             <div class="modal-footer">
@@ -19,17 +21,3 @@
         </div>
     </div>
 </div>
-
-<script>
-    $('#imageModal').on('show.bs.modal', function (event) {
-        var button = $(event.relatedTarget); 
-        var image = button.data('image'); 
-        var title = button.data('title');
-        var description = button.data('description');
-
-        var modal = $(this);
-        modal.find('.modal-title').text(title);
-        modal.find('#modalImage').attr('src', image);
-        modal.find('#eventDescription').text(description);
-    });
-</script>

@@ -6,6 +6,9 @@ from django_select2 import forms as s2forms
 from django.contrib.auth.models import User
 from django.db import IntegrityError
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from datetime import date
+from django.core.exceptions import ValidationError
+import re
 
 # usuarios
 
@@ -18,12 +21,12 @@ class UsuarioForm(forms.ModelForm):
             'escolaridad', 'profesion'
         ]
         widgets = {
-            'nombres': forms.TextInput(attrs={'class': 'form-control'}),
-            'apellidos': forms.TextInput(attrs={'class': 'form-control'}),
-            'n_documento': forms.TextInput(attrs={'class': 'form-control'}),
-            'fecha_nacimiento': forms.DateInput(attrs={'class': 'form-control','type': 'date'}),
-            'direccion': forms.TextInput(attrs={'class': 'form-control'}),
-            'telefono': forms.TextInput(attrs={'class': 'form-control'}),
+            'nombres': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el nombre'}),
+            'apellidos': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el apellido'}),
+            'n_documento': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Número de documento'}),
+            'fecha_nacimiento': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'direccion': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese la dirección'}),
+            'telefono': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Número de teléfono'}),
             'identificacion': forms.Select(attrs={'class': 'form-select'}),
             'parentesco': forms.Select(attrs={'class': 'form-select'}),
             'genero': forms.Select(attrs={'class': 'form-select'}),
@@ -31,27 +34,91 @@ class UsuarioForm(forms.ModelForm):
             'escolaridad': forms.Select(attrs={'class': 'form-select'}),
             'profesion': forms.Select(attrs={'class': 'form-select'}),
         }
+
+    identificacion = forms.ModelChoiceField(
+        queryset=TipoIdentificacion.objects.all(),
+        empty_label="Selecciona tipo de identificación",
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
     
-    def __init__(self, *args, **kwargs):
-            super().__init__(*args, **kwargs)
-            self.fields['identificacion'].queryset = TipoIdentificacion.objects.all()
-            self.fields['identificacion'].empty_label = "Selecciona tipo de identificación"
+    parentesco = forms.ModelChoiceField(
+        queryset=TipoParentesco.objects.all(),
+        empty_label="Selecciona tipo de parentesco",
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
 
-            self.fields['parentesco'].queryset = TipoParentesco.objects.all()
-            self.fields['parentesco'].empty_label = "Selecciona tipo de parentesco"
+    genero = forms.ModelChoiceField(
+        queryset=TipoGenero.objects.all(),
+        empty_label="Selecciona género",
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
 
-            self.fields['genero'].queryset = TipoGenero.objects.all()
-            self.fields['genero'].empty_label = "Selecciona género"
+    estadoCivil = forms.ModelChoiceField(
+        queryset=TipoEstadoCivil.objects.all(),
+        empty_label="Selecciona estado civil",
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
 
-            self.fields['estadoCivil'].queryset = TipoEstadoCivil.objects.all()
-            self.fields['estadoCivil'].empty_label = "Selecciona estado civil"
+    escolaridad = forms.ModelChoiceField(
+        queryset=TipoEscolaridad.objects.all(),
+        empty_label="Selecciona nivel de escolaridad",
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
 
-            self.fields['escolaridad'].queryset = TipoEscolaridad.objects.all()
-            self.fields['escolaridad'].empty_label = "Selecciona nivel de escolaridad"
+    profesion = forms.ModelChoiceField(
+        queryset=TipoProfesion.objects.all(),
+        empty_label="Selecciona profesión",
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
 
-            self.fields['profesion'].queryset = TipoProfesion.objects.all()
-            self.fields['profesion'].empty_label = "Selecciona profesión"
+    # Validación de campos
+    def clean_nombres(self):
+        nombres = self.cleaned_data.get('nombres')
+        if not nombres:
+            raise ValidationError('El campo "Nombres" es obligatorio.')
+        if not re.match(r'^[a-zA-ZñÑ\s]{3,}$', nombres):
+            raise ValidationError('El campo "Nombres" solo puede contener letras y debe tener al menos 3 caracteres.')
+        return nombres
 
+    def clean_apellidos(self):
+        apellidos = self.cleaned_data.get('apellidos')
+        if not apellidos:
+            raise ValidationError('El campo "Apellidos" es obligatorio.')
+        if not re.match(r'^[a-zA-Z\s]{3,}$', apellidos):
+            raise ValidationError('El campo "Apellidos" solo puede contener letras y debe tener al menos 3 caracteres.')
+        return apellidos
+
+    def clean_n_documento(self):
+        n_documento = self.cleaned_data.get('n_documento')
+        if not n_documento:
+            raise ValidationError('El campo "Número de Documento" es obligatorio.')
+        
+        if not re.match(r'^\d{8,10}$', n_documento):
+            raise ValidationError('El "Número de Documento" debe tener entre 8 y 10 dígitos numéricos.')
+        
+        usuario_id = self.instance.id if self.instance else None
+
+        if Usuario.objects.filter(n_documento=n_documento).exclude(id=usuario_id).exists():
+            raise ValidationError('El "Número de Documento" ya se encuentra registrado en el sistema.')
+
+        return n_documento
+
+    def clean_telefono(self):
+        telefono = self.cleaned_data.get('telefono')
+        if not telefono:
+            raise ValidationError('El campo "Teléfono" es obligatorio.')
+        if not re.match(r'^\d{10}$', telefono):
+            raise ValidationError('El "Teléfono" debe contener exactamente 10 dígitos numéricos.')
+        return telefono
+
+    def clean_direccion(self):
+        direccion = self.cleaned_data.get('direccion')
+        if not direccion:
+            raise ValidationError('El campo "Dirección" es obligatorio.')
+        if len(direccion) < 3:
+            raise ValidationError('La "Dirección" debe contener al menos 3 caracteres.')
+        return direccion    
+    
 # familia
 
 class FamiliaForm(forms.ModelForm):
@@ -71,6 +138,9 @@ class UserSearch(s2forms.ModelSelect2Widget):
         'apellidos__icontains',
         'n_documento__icontains',
     ]
+
+    def label_from_instance(self, obj):
+        return f"{obj.nombres} {obj.apellidos} - {obj.identificacion.codigo} - {obj.n_documento}"
     
 class FamiliaSearch(s2forms.ModelSelect2Widget):
     search_fields = ['n_familia__icontains',]
@@ -90,13 +160,29 @@ class UsuarioFamiliaForm(forms.ModelForm):
 class EventoForm(forms.ModelForm):
     class Meta:
         model = Evento
-        fields = ['nombre', 'descripcion', 'imagen']  # Incluye los nuevos campos
+        fields = ['nombre', 'descripcion', 'imagen', 'fecha_inicio', 'fecha_fin', 'es_favorito'] 
 
         widgets = {
             'nombre': forms.TextInput(attrs={'class': 'form-control'}),
             'descripcion': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'imagen': forms.FileInput(attrs={'class': 'form-control'}),
+            'fecha_inicio': forms.DateInput(attrs={'class': 'form-control','type': 'date'}),
+            'fecha_fin': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'es_favorito': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super(EventoForm, self).__init__(*args, **kwargs)
+        self.fields['fecha_inicio'].initial = date.today()
+        self.fields['fecha_fin'].initial = date.today()
+
+    def clean_nombres(self):
+        nombre = self.cleaned_data.get('nombre')
+        if not nombre:
+            raise ValidationError('El campo "Nombre" es obligatorio.')
+        if not re.match(r'^[a-zA-ZñÑ0-9\s]{3,}$', nombre):
+            raise ValidationError('El campo "Nombre" solo puede contener letras y debe tener al menos 3 caracteres.')
+        return nombre
 
 # usuario evento UsuarioEvento
 
@@ -106,13 +192,19 @@ class EventoSearch(s2forms.ModelSelect2Widget):
 class UsuarioEventoForm(forms.ModelForm):
     class Meta:
         model = UsuarioEvento
-        fields = ['usuario', 'evento']
+        fields = ['usuario', 'evento', 'fecha_asistencia', 'asistencia']
 
         widgets = {
             'usuario': UserSearch(attrs={'class': 'form-select'}),
-            'evento': forms.HiddenInput(),
+            'evento': EventoSearch(attrs={'class': 'form-select'}),
+            'fecha_asistencia': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'asistencia': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
 
+    def __init__(self, *args, **kwargs):
+        super(UsuarioEventoForm, self).__init__(*args, **kwargs)
+        self.fields['fecha_asistencia'].initial = date.today()
+        
 # login
 
 class CustomUserCreationForm(UserCreationForm):

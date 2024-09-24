@@ -2,7 +2,7 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <title>{% block title %}{% endblock %}</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
@@ -32,99 +32,7 @@
 
     <script src="https://kit.fontawesome.com/2f53e3b8a2.js" crossorigin="anonymous"></script>
 
-    <!-- DataTables Initialization -->
-    <script>
-      $(document).ready(function() {
-        $('.miTabla').DataTable({
-          "language": {
-            "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json"
-          }
-        });
-
-        $('#select-field2').select2({
-          theme: "bootstrap-5",
-          width: $(this).data('width') ? $(this).data('width') : $(this).hasClass('w-100') ? '100%' : 'style',
-          placeholder: $(this).data('placeholder'),
-          closeOnSelect: false,
-        });
-      });
-    </script>
-
-    {{ form.media.css }}
-    
-    <!-- Custom CSS for sizes -->
-    <style>
-      .image-box img {
-        width: 100%;
-        height: 200px;
-        object-fit: cover;
-      }
-
-      .carousel-inner img {
-        width: 100%;
-        height: 400px;
-        object-fit: cover;
-      }
-
-      .modal-content {
-        border: 2px solid rgba(255, 255, 255, 0.5);
-        border-radius: 20px;
-        backdrop-filter: blur(20px);
-        box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
-    }
-    
-      .navegacion .btn:hover {
-          background: #fff;
-          color: #090f1d;
-      }
-
-      .image-box {
-        overflow: hidden;
-        position: relative;
-        width: 100%;
-        height: 200px; /* Altura fija */
-        border-radius: 15px; /* Bordes redondeados */
-        transition: transform 0.4s ease, box-shadow 0.4s ease;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra suave */
-      }
-    
-      .image-box img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover; /* Ajusta la imagen para cubrir el contenedor */
-        transition: transform 0.4s ease, opacity 0.4s ease;
-        border-radius: 15px; /* Bordes redondeados en la imagen */
-      }
-    
-      .image-box:hover img {
-        transform: scale(1.05); /* Zoom sutil */
-        opacity: 0.9; /* Ligera reducción de opacidad */
-      }
-    
-      .image-box:hover {
-        box-shadow: 0 12px 20px rgba(0, 0, 0, 0.3); /* Sombra más pronunciada */
-        transform: translateY(-8px); /* Elevación al pasar el cursor */
-      }
-    
-      .carousel-inner img {
-        width: 100%;
-        height: 400px;
-        object-fit: cover;
-      }
-    
-      .modal-content {
-        border: 2px solid rgba(255, 255, 255, 0.5);
-        border-radius: 20px;
-        backdrop-filter: blur(20px);
-        box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
-      }
-    
-      .navegacion .btn:hover {
-        background: #fff;
-        color: #090f1d;
-      }
-    
-    </style>
+    <link rel="stylesheet" href="{% static 'css/landing.css' %}">
   </head>
 
   <body>
@@ -133,7 +41,8 @@
     <div>
       {% block content %}{% endblock %}
     </div>
-    {% include 'bases/landing/card.html' %}
+    {% include 'bases/landing/modal.html' %}
+
     <!-- Footer -->
     <footer class="bg-dark text-white text-center py-4 mt-5">
         <p>&copy; 2024 Tu Empresa. Todos los derechos reservados.</p>

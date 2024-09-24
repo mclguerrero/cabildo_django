@@ -1,4 +1,5 @@
-<!-- nav.html -->
+<!-- bases/nav.html -->
+ 
 {% load static %}
 <nav class="navbar bg-body-terciario fixed-top bg-dark custom-navbar">
   <div class="container-fluid ms-5 me-5">
@@ -22,11 +23,8 @@
 
     <ul class="nav justify-content-end nav-list">
 
-      {% if not user.is_authenticated %}
-      <!-- Si el usuario NO está autenticado, mostrar "Iniciar sesión" y "Crear cuenta" -->
-
       <li class="nav-item">
-        <a class="nav-link text-white" href="">Cronograma de Eventos</a>
+        <a class="nav-link text-white" href="{% url 'cronograma_eventos' %}">Cronograma de Eventos</a>
       </li>
 
       <li class="nav-item dropdown">
@@ -35,12 +33,12 @@
         </a>
         <ul class="dropdown-menu dropdown-menu-dark bg-dark">
           <li>
-            <a class="dropdown-item text-white" href="#">
+            <a class="dropdown-item text-white" href="{% url 'misionVision' %}">
               <i class="fa-solid fa-handshake"></i> - Mision y Vision
             </a>
           </li>
           <li>
-            <a class="dropdown-item text-white" href="#">
+            <a class="dropdown-item text-white" href="{% url 'historia' %}">
               <i class="fa-solid fa-book-open"></i> - Historia
             </a>
           </li>
@@ -51,6 +49,11 @@
           </li>
         </ul>
       </li>
+
+
+
+      {% if not user.is_authenticated %}
+      <!-- Si el usuario NO está autenticado, mostrar "Iniciar sesión" y "Crear cuenta" -->
 
       <li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">

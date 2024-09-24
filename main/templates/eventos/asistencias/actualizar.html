@@ -1,20 +1,25 @@
 {% extends 'bases/card.html' %}
-{% block title %}Actualizar Asistencia{% endblock %}
-{% block card_title %}Actualizar Asistencia{% endblock %}
+{% block title %}Editar Asistencia{% endblock %}
+{% block card_title %}Editar Asistencia{% endblock %}
 {% block card_content %}
+{% include 'bases/messages.html' %}
 
 <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-success">Actualizar</button>
-    <a href="{% url 'listar_usuarios_eventos' %}" class="btn btn-secondary">Cancelar</a>
+  {% csrf_token %}
+  {{ form.as_p }}
+  <div class="d-grid gap-2 col-3 mx-auto pt-3 pb-3">
+    <div class="d-flex justify-content-center">
+      <button type="submit" class="btn btn-primary me-2">Guardar</button>
+      <a class="btn btn-secondary" href="{% url 'listar_asistencias_usuario' usuario_id %}">Cancelar</a>
+      </div>  
+  </div>
 </form>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>  <!-- jQuery -->
-{{ form.media.js }}  <!-- Incluye los scripts JS de Select2 -->
+
+{{ form.media.js }}
 
 {% endblock %}
 {% block content %}
-  {% with container_class="container w-50" %}
+  {% with container_class="w-50" %}
     {{ block.super }}
   {% endwith %}
 {% endblock %}

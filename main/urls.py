@@ -42,13 +42,14 @@ urlpatterns = [
 
     # usuarios eventos
 
-    path('user/events/', views.listar_usuarios_eventos, name='listar_usuarios_eventos'),
+    path('users/events/', views.listar_usuarios_eventos, name='listar_usuarios_eventos'),
     path('user/events/new/', views.crear_usuario_evento, name='crear_usuario_evento'),
     path('user/events/<int:pk>/edit/', views.actualizar_usuario_evento, name='actualizar_usuario_evento'),
     path('user/events/<int:pk>/delete/', views.eliminar_usuario_evento, name='eliminar_usuario_evento'),
     path('events/<int:evento_id>/list/', views.listar_usuarios_por_evento, name='listar_usuarios_por_evento'),
     path('events/<int:evento_id>/registrar_usuario/', views.registrar_usuario_a_evento, name='registrar_usuario_a_evento'),
-
+    path('assistance/user/<int:usuario_id>/', views.listar_asistencias_usuario, name='listar_asistencias_usuario'),
+    
     # login
 
     path('signup/', views.signup, name='signup'),
@@ -64,7 +65,13 @@ urlpatterns = [
 
     path('myFamily/', views.ver_mifamilia, name='ver_mifamilia'),
 
+    #---------
+
     path('', views.index, name='index'), 
+    path('history', views.historia, name='historia'), 
+    path('mission/Vision ', views.misionVision, name='misionVision'), 
+    path('events/schedule', views.cronograma_eventos, name='cronograma_eventos'), 
+
 ]
 
 if settings.DEBUG:

@@ -18,7 +18,7 @@
 
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>  <!-- jQuery -->
     <!-- Select2 Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
@@ -32,42 +32,18 @@
 
     <script src="https://kit.fontawesome.com/2f53e3b8a2.js" crossorigin="anonymous"></script>
 
-    <!-- DataTables Initialization -->
-    <script>
-      $(document).ready(function() {
-        $('.miTabla').DataTable({
-          "language": {
-            "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json"
-          }
-        });
-      });
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 
-
-  
-        $( '#select-field2' ).select2( {
-          theme: "bootstrap-5",
-          width: $( this ).data( 'width' ) ? $( this ).data( 'width' ) : $( this ).hasClass( 'w-100' ) ? '100%' : 'style',
-          placeholder: $( this ).data( 'placeholder' ),
-          closeOnSelect: false,
-      });
-
-    </script>
-
-    
-
-    {{ form.media.css }}
-    
+    <script src="{% static 'js/scripts.js' %}"></script>
   </head>
 
   <body>
     <header>{% include 'bases/nav.html' %}</header>
     
-    <div style="height: 80px;"></div>
-
     <div>
       {% block content %}{% endblock %}
     </div>
-
+    
     <footer></footer>
   </body>
 </html>

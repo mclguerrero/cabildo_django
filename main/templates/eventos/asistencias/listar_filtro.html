@@ -2,26 +2,51 @@
 {% block title %}Usuarios del Evento: {{ evento.nombre }}{% endblock %}
 {% block card_title %}Usuarios del Evento: {{ evento.nombre }}{% endblock %}
 {% block card_content %}
+{% include 'bases/messages.html' %}
 
-    <a href="{% url 'listar_eventos' %}" class="btn btn-secondary mb-3">Volver a Eventos</a>
-    <table class="table table-hover fs-6 table-responsive miTabla table-bordered text-center">
-        <thead>
-            <tr>
-                <th class="text-center">Usuario</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for usuario_evento in usuarios_eventos %}
-            <tr>
-                <td>{{ usuario_evento.usuario }}</td>
-            </tr>
+<a href="{% url 'listar_eventos' %}" class="btn btn-secondary mb-3">Volver a Eventos</a>
+
+<table class="table table-hover fs-6 table-responsive miTabla table-bordered text-center">
+    <thead>
+        <tr>
+            <th class="text-center">Nombre Completo</th>
+            {% for fecha in fechas_evento %}
+                <th class="text-center">Fecha: {{ fecha }}</th>
             {% endfor %}
-        </tbody>
-    </table>
+            <th class="text-center">Faltas</th>
+            <th class="text-center">Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for usuario, data in asistencias_por_usuario %}
+        <tr>
+            <td>{{ usuario.nombres }} {{ usuario.apellidos }}</td>
+            {% for asistencia in data.asistencias %}
+                <td>
+                    {% if asistencia %}
+                        <span class="badge bg-success">Asistió</span>
+                    {% else %}
+                        <span class="badge bg-danger">No Asistió</span>
+                    {% endif %}
+                </td>
+            {% endfor %}
+            <td>{{ data.faltas }}</td>
+            <td>
+                <a href="{% url 'listar_asistencias_usuario' usuario.id %}" class="btn fa-solid fa-magnifying-glass btn-sm" style="color: #007bff;"></a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="{{ fechas_evento|length|add:2 }}" class="text-center">No hay registros disponibles.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
 
 {% endblock %}
 {% block content %}
-    {% with container_class="ms-5 me-5" %}
+    {% with container_class="w-100" %}
         {{ block.super }}
     {% endwith %}
 {% endblock %}
