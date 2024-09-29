@@ -1,48 +1,63 @@
 # models
+
 from datetime import date
 from django.db import models
 from django.contrib.auth.models import User
 
 # usuario
 
+class Zona(models.Model):
+    nombre = models.CharField(max_length=45, unique=True)
+    codigo = models.CharField(max_length=5, unique=True)
+    
+    def __str__(self):
+        return f"{self.nombre}"
+
+class Localidad (models.Model):
+    zona = models.ForeignKey(Zona, on_delete=models.CASCADE)
+    nombre = models.CharField(max_length=45, unique=True)
+
+    def __str__(self):
+        return f"{self.nombre}"
+
 class TipoIdentificacion(models.Model):
-    nombre = models.CharField(max_length=45)
-    codigo = models.CharField(max_length=10)
+    nombre = models.CharField(max_length=45, unique=True)
+    codigo = models.CharField(max_length=5, unique=True)
 
     def __str__(self):
         return f"{self.nombre}"
 
 class TipoParentesco(models.Model):
-    nombre = models.CharField(max_length=45)
-    codigo = models.CharField(max_length=10)
+    nombre = models.CharField(max_length=45, unique=True)
+    codigo = models.CharField(max_length=5, unique=True)
 
     def __str__(self):
         return f"{self.nombre}"
 
 class TipoGenero(models.Model):
-    nombre = models.CharField(max_length=45)
-    codigo = models.CharField(max_length=10)
+    nombre = models.CharField(max_length=45, unique=True)
+    codigo = models.CharField(max_length=5, unique=True)
 
     def __str__(self):
         return f"{self.nombre}"
 
 class TipoEstadoCivil(models.Model):
-    nombre = models.CharField(max_length=45)
-    codigo = models.CharField(max_length=10)
+    nombre = models.CharField(max_length=45, unique=True)
+    codigo = models.CharField(max_length=5, unique=True)
 
     def __str__(self):
         return f"{self.nombre}"
 
 class TipoEscolaridad(models.Model):
-    nombre = models.CharField(max_length=45)
-    codigo = models.CharField(max_length=10)
+    nombre = models.CharField(max_length=45, unique=True)
+    codigo = models.CharField(max_length=5, unique=True)
 
     def __str__(self):
         return f"{self.nombre}"
 
 class TipoProfesion(models.Model):
-    nombre = models.CharField(max_length=45)
-    codigo = models.CharField(max_length=10)
+    nombre = models.CharField(max_length=45, unique=True)
+    codigo = models.CharField(max_length=5, unique=True)
 
     def __str__(self):
         return f"{self.nombre}"
@@ -51,16 +66,17 @@ class Usuario(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     nombres = models.CharField(max_length=45)
     apellidos = models.CharField(max_length=45)
-    n_documento = models.CharField(max_length=45, unique=True)
+    n_documento = models.CharField(max_length=10, unique=True)
     fecha_nacimiento = models.DateField()
-    direccion = models.CharField(max_length=45)
-    telefono = models.CharField(max_length=45)
+    zona = models.ForeignKey(Zona, on_delete=models.CASCADE)
+    localidad = models.ForeignKey(Localidad, on_delete=models.CASCADE)
+    direccion = models.CharField(max_length=45, null=True, blank=True)
+    telefono = models.CharField(max_length=10, null=True, blank=True)
     identificacion = models.ForeignKey(TipoIdentificacion, on_delete=models.CASCADE)
-    parentesco = models.ForeignKey(TipoParentesco, on_delete=models.CASCADE)
     genero = models.ForeignKey(TipoGenero, on_delete=models.CASCADE)
-    estadoCivil = models.ForeignKey(TipoEstadoCivil, on_delete=models.CASCADE)
-    escolaridad = models.ForeignKey(TipoEscolaridad, on_delete=models.CASCADE)
-    profesion = models.ForeignKey(TipoProfesion, on_delete=models.CASCADE)
+    estadoCivil = models.ForeignKey(TipoEstadoCivil, on_delete=models.CASCADE, null=True, blank=True)
+    escolaridad = models.ForeignKey(TipoEscolaridad, on_delete=models.CASCADE, null=True, blank=True)
+    profesion = models.ForeignKey(TipoProfesion, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         return f"{self.nombres} {self.apellidos}"
@@ -78,7 +94,7 @@ class Usuario(models.Model):
 # familia
 
 class Familia(models.Model):
-    n_familia = models.CharField(max_length=45)
+    n_familia = models.CharField(max_length=45, unique=True)
 
     def __str__(self):
         return self.n_familia
@@ -86,6 +102,7 @@ class Familia(models.Model):
 class UsuarioFamilia(models.Model):
     usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE)
     familia = models.ForeignKey(Familia, on_delete=models.CASCADE)
+    parentesco = models.ForeignKey(TipoParentesco, on_delete=models.CASCADE)
 
     def __str__(self):
         return f"{self.usuario} - {self.familia}"
@@ -94,8 +111,8 @@ class UsuarioFamilia(models.Model):
 
 class Evento(models.Model):
     nombre = models.CharField(max_length=45)
-    descripcion = models.TextField(blank=True)  
-    imagen = models.ImageField(upload_to='eventos/', blank=True, null=True)  
+    descripcion = models.TextField(null=True, blank=True)  
+    imagen = models.ImageField(upload_to='eventos/', null=True, blank=True)  
     fecha_inicio = models.DateField()
     fecha_fin = models.DateField()
     es_favorito = models.BooleanField(default=False)

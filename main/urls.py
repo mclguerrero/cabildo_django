@@ -18,6 +18,7 @@ urlpatterns = [
     path('user/<int:pk>/', views.ver_usuario, name='ver_usuario'),
     path('user/<int:pk>/edit/', views.actualizar_usuario, name='actualizar_usuario'),
     path('user/<int:pk>/delete/', views.eliminar_usuario, name='eliminar_usuario'),
+    path('get_localidades/', views.get_localidades, name='get_localidades'),
 
     # familias
 
@@ -70,7 +71,13 @@ urlpatterns = [
     path('', views.index, name='index'), 
     path('history', views.historia, name='historia'), 
     path('mission/Vision ', views.misionVision, name='misionVision'), 
-    path('events/schedule', views.cronograma_eventos, name='cronograma_eventos'), 
+    path('events/schedule', views.cronograma_eventos, name='cronograma_eventos'),
+
+    # pdf
+
+
+    path('usuarios/pdf/', views.generar_pdf_usuarios, name='generar_pdf_usuarios'),
+path('evento/<int:evento_id>/asistencias/pdf/', views.generar_pdf_asistencias_evento, name='generar_pdf_asistencias_evento'), 
 
 ]
 

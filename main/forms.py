@@ -1,14 +1,14 @@
 # forms
 
+import re
 from django import forms
-from .models import Usuario, TipoIdentificacion, TipoParentesco, TipoGenero, TipoEstadoCivil, TipoEscolaridad, TipoProfesion, Familia, UsuarioFamilia, Evento, UsuarioEvento
+from .models import Usuario, TipoIdentificacion, TipoParentesco, TipoGenero, TipoEstadoCivil, TipoEscolaridad, TipoProfesion, Familia, UsuarioFamilia, Evento, UsuarioEvento, Zona, Localidad
 from django_select2 import forms as s2forms
 from django.contrib.auth.models import User
 from django.db import IntegrityError
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from datetime import date
 from django.core.exceptions import ValidationError
-import re
 
 # usuarios
 
@@ -16,19 +16,18 @@ class UsuarioForm(forms.ModelForm):
     class Meta:
         model = Usuario
         fields = [
-            'nombres', 'apellidos', 'n_documento', 'fecha_nacimiento', 'direccion',
-            'telefono', 'identificacion', 'parentesco', 'genero', 'estadoCivil', 
-            'escolaridad', 'profesion'
+            'nombres', 'apellidos', 'n_documento', 'fecha_nacimiento', 'zona', 'localidad', 'direccion', 'telefono', 'identificacion', 'genero', 'estadoCivil', 'escolaridad', 'profesion'
         ]
         widgets = {
             'nombres': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el nombre'}),
             'apellidos': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese el apellido'}),
             'n_documento': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Número de documento'}),
             'fecha_nacimiento': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'zona': forms.Select(attrs={'class': 'form-select', 'id': 'zona-select'}),
+            'localidad': forms.Select(attrs={'class': 'form-select', 'id': 'localidad-select'}),
             'direccion': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ingrese la dirección'}),
             'telefono': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Número de teléfono'}),
             'identificacion': forms.Select(attrs={'class': 'form-select'}),
-            'parentesco': forms.Select(attrs={'class': 'form-select'}),
             'genero': forms.Select(attrs={'class': 'form-select'}),
             'estadoCivil': forms.Select(attrs={'class': 'form-select'}),
             'escolaridad': forms.Select(attrs={'class': 'form-select'}),
@@ -41,12 +40,6 @@ class UsuarioForm(forms.ModelForm):
         widget=forms.Select(attrs={'class': 'form-select'})
     )
     
-    parentesco = forms.ModelChoiceField(
-        queryset=TipoParentesco.objects.all(),
-        empty_label="Selecciona tipo de parentesco",
-        widget=forms.Select(attrs={'class': 'form-select'})
-    )
-
     genero = forms.ModelChoiceField(
         queryset=TipoGenero.objects.all(),
         empty_label="Selecciona género",
@@ -71,6 +64,18 @@ class UsuarioForm(forms.ModelForm):
         widget=forms.Select(attrs={'class': 'form-select'})
     )
 
+    zona = forms.ModelChoiceField(
+        queryset=Zona.objects.all(),
+        empty_label="Selecciona zona",
+        widget=forms.Select(attrs={'class': 'form-select', 'id': 'zona-select'})
+    )
+
+    localidad = forms.ModelChoiceField(
+        queryset=Localidad.objects.none(), 
+        empty_label="Selecciona localidad",
+        widget=forms.Select(attrs={'class': 'form-select', 'id': 'localidad-select'})
+    )
+
     # Validación de campos
     def clean_nombres(self):
         nombres = self.cleaned_data.get('nombres')
@@ -93,8 +98,8 @@ class UsuarioForm(forms.ModelForm):
         if not n_documento:
             raise ValidationError('El campo "Número de Documento" es obligatorio.')
         
-        if not re.match(r'^\d{8,10}$', n_documento):
-            raise ValidationError('El "Número de Documento" debe tener entre 8 y 10 dígitos numéricos.')
+        if not re.match(r'^\d{7,10}$', n_documento):
+            raise ValidationError('El "Número de Documento" debe tener entre 7 y 10 dígitos numéricos.')
         
         usuario_id = self.instance.id if self.instance else None
 
@@ -105,20 +110,28 @@ class UsuarioForm(forms.ModelForm):
 
     def clean_telefono(self):
         telefono = self.cleaned_data.get('telefono')
-        if not telefono:
-            raise ValidationError('El campo "Teléfono" es obligatorio.')
         if not re.match(r'^\d{10}$', telefono):
             raise ValidationError('El "Teléfono" debe contener exactamente 10 dígitos numéricos.')
         return telefono
 
     def clean_direccion(self):
         direccion = self.cleaned_data.get('direccion')
-        if not direccion:
-            raise ValidationError('El campo "Dirección" es obligatorio.')
         if len(direccion) < 3:
             raise ValidationError('La "Dirección" debe contener al menos 3 caracteres.')
         return direccion    
-    
+
+    def __init__(self, *args, **kwargs):
+        super(UsuarioForm, self).__init__(*args, **kwargs)
+        # Aquí puedes filtrar las localidades si es necesario
+        if 'zona' in self.data:
+            try:
+                zona_id = int(self.data.get('zona'))
+                self.fields['localidad'].queryset = Localidad.objects.filter(zona_id=zona_id).order_by('nombre')
+            except (ValueError, TypeError):
+                pass  # Si no hay zona seleccionada, no se cambia la localidad
+        elif self.instance.pk:  # Si estamos editando un usuario existente
+            self.fields['localidad'].queryset = self.instance.zona.localidades.all()  # Cambia según tu relación
+        
 # familia
 
 class FamiliaForm(forms.ModelForm):
@@ -148,12 +161,20 @@ class FamiliaSearch(s2forms.ModelSelect2Widget):
 class UsuarioFamiliaForm(forms.ModelForm):
     class Meta:
         model = UsuarioFamilia
-        fields = ['usuario', 'familia']
+        fields = ['usuario', 'familia', 'parentesco']
 
         widgets = {
             'usuario': UserSearch(attrs={'class': 'form-select'}),
             'familia': FamiliaSearch(attrs={'class': 'form-select'}),
+            'parentesco': forms.Select(attrs={'class': 'form-select'}),
         }
+
+    parentesco = forms.ModelChoiceField(
+        queryset=TipoParentesco.objects.all(),
+        empty_label="Selecciona parentesco",
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+
         
 # evento
 
@@ -210,7 +231,7 @@ class UsuarioEventoForm(forms.ModelForm):
 class CustomUserCreationForm(UserCreationForm):
     username = forms.CharField(
         max_length=150,
-        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Username'})
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre de usuario'})
     )
 
     password1 = forms.CharField(
@@ -218,13 +239,13 @@ class CustomUserCreationForm(UserCreationForm):
     )
 
     password2 = forms.CharField(
-        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Repita Contraseña'})
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Repite la contraseña'})
     )
 
     class Meta:
         model = User
         fields = ['username', 'password1', 'password2']
-
+    
 class CustomAuthenticationForm(AuthenticationForm):
     username = forms.CharField(
         max_length=150,

@@ -6,8 +6,14 @@
 {% block card_content %}
 {% include 'bases/messages.html' %}
 
+
 <div class="mb-3">
-    <a href="{% url 'crear_usuario' %}" class="btn btn-primary">Registrar Usuario</a>
+    <a href="{% url 'crear_usuario' %}" class="btn btn-primary me-2">
+        <i class="fa-solid fa-user-plus fa-xl"></i> Crear Usuario
+    </a>
+    <a href="{% url 'generar_pdf_usuarios' %}" class="btn btn-danger">
+        <i class="fa-solid fa-file-pdf fa-xl"></i> Generar PDF
+    </a>
 </div>
 
 <table class="table w-100 table-hover fs-6 table-responsive miTabla table-bordered text-center">
@@ -43,7 +49,7 @@
             <td>{{ usuario.estadoCivil }}</td>
             <td>{{ usuario.profesion }}</td>
             <td>{{ usuario.escolaridad }}</td>
-            <td>{{ usuario.direccion }}</td>
+            <td>{{ usuario.zona }} {{ usuario.localidad }} - {{ usuario.direccion }}</td>
             <td>{{ usuario.telefono }}</td>
             <td>
                 <a href="{% url 'ver_usuario' usuario.pk %}" class="btn fa-solid fa-magnifying-glass btn-sm" style="color: #007bff;"></a>

@@ -4,11 +4,19 @@
 {% block card_content %}
 {% include 'bases/messages.html' %}
 
-<a href="{% url 'listar_eventos' %}" class="btn btn-secondary mb-3">Volver a Eventos</a>
+<div class="mb-3">
+    <a href="{% url 'listar_eventos' %}" class="btn btn-primary me-2">
+        <i class="fa-solid fa-arrow-left fa-xl"></i> Volver a Eventos
+    </a>
+    <a href="{% url 'generar_pdf_asistencias_evento' evento.id %}" class="btn btn-danger">
+        <i class="fa-solid fa-file-pdf fa-xl"></i> Generar PDF
+    </a>
+</div>
 
 <table class="table table-hover fs-6 table-responsive miTabla table-bordered text-center">
     <thead>
         <tr>
+            <th class="text-center">#</th>
             <th class="text-center">Nombre Completo</th>
             {% for fecha in fechas_evento %}
                 <th class="text-center">Fecha: {{ fecha }}</th>
@@ -20,6 +28,7 @@
     <tbody>
         {% for usuario, data in asistencias_por_usuario %}
         <tr>
+            <td>{{ forloop.counter }}</td>
             <td>{{ usuario.nombres }} {{ usuario.apellidos }}</td>
             {% for asistencia in data.asistencias %}
                 <td>

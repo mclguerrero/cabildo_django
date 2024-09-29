@@ -2,8 +2,8 @@
 
 from django import forms
 from django.shortcuts import render, get_object_or_404, redirect
-from django.http import HttpResponse
-from .models import Usuario, Familia, UsuarioFamilia, Evento, UsuarioEvento
+from django.http import HttpResponse, JsonResponse
+from .models import Usuario, Familia, UsuarioFamilia, Evento, UsuarioEvento, Localidad
 from .forms import UsuarioForm, FamiliaForm, UsuarioFamiliaForm, EventoForm, UsuarioEventoForm, CustomUserCreationForm, CustomAuthenticationForm
 from django.contrib.auth.models import Group, User
 from django.db import IntegrityError
@@ -13,6 +13,9 @@ from django.core.files.storage import default_storage
 from django.utils.timezone import timedelta
 from django.contrib import messages
 from django.utils import timezone
+from django.template.loader import render_to_string
+from weasyprint import HTML
+import tempfile
 
 # ROL usuario
 
@@ -110,7 +113,7 @@ def ver_usuario(request, pk):
 @login_required
 @user_passes_test(lambda u: u.groups.filter(name='Admin').exists())
 def listar_usuarios(request):
-    usuarios = Usuario.objects.all().select_related('identificacion', 'parentesco', 'genero', 'estadoCivil', 'escolaridad', 'profesion')
+    usuarios = Usuario.objects.all().select_related('identificacion', 'genero', 'estadoCivil', 'escolaridad', 'profesion')
     return render(request, 'usuarios/listar.html', {'usuarios': usuarios})
 
 @login_required
@@ -119,10 +122,17 @@ def crear_usuario(request):
     if request.method == 'POST':
         form = UsuarioForm(request.POST)
         
+        # Imprimir los datos que se están intentando guardar
+        print("Datos del formulario:", request.POST)
+
         if form.is_valid():
             try:
                 usuario = form.save(commit=False)
                 n_documento = form.cleaned_data['n_documento']
+                
+                # Imprimir los datos que se guardarán
+                print("Datos validados para guardar:", usuario)
+                print("Número de documento:", n_documento)
                 
                 user, created = User.objects.get_or_create(
                     username=n_documento,
@@ -139,7 +149,7 @@ def crear_usuario(request):
                     try:
                         group = Group.objects.get(name='Usuario')
                         user.groups.add(group)
-                        messages.success(request, f'El usuario se ha creado con éxito.')
+                        messages.success(request, 'El usuario se ha creado con éxito.')
                     except Group.DoesNotExist:
                         messages.warning(request, 'Error: El grupo "Usuario" no está configurado en el sistema.')
                 else:
@@ -148,15 +158,19 @@ def crear_usuario(request):
                 usuario.user = user
                 usuario.save()
 
-                form = UsuarioForm
+                form = UsuarioForm()
             
             except Exception as e:
                 messages.warning(request, f'Ocurrió un error inesperado al crear el usuario: {str(e)}')
-        
+                for field, errors in form.errors.items():
+                    for error in errors:
+                        print(f'Error en {field}: {error}')
         else:
             messages.warning(request, 'Hay errores en el formulario. Por favor corrige los campos indicados.')
+            print("Errores del formulario:", form.errors)  # Imprimir los errores si el formulario no es válido
     else:
         form = UsuarioForm()
+    
     return render(request, 'usuarios/crear.html', {'form': form})
 
 @login_required
@@ -191,6 +205,16 @@ def eliminar_usuario(request, pk):
     usuario.delete()
     return redirect('listar_usuarios')
 
+@login_required
+@user_passes_test(lambda u: u.groups.filter(name='Admin').exists())
+def get_localidades(request):
+    if request.method == "GET" and request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        zona_id = request.GET.get('zona', None)
+        localidades = Localidad.objects.filter(zona_id=zona_id).values('id', 'nombre')
+        return JsonResponse(list(localidades), safe=False)
+    else:
+        return JsonResponse({'error': 'No se permite esta solicitud'}, status=400)
+        
 # familias
 
 @login_required
@@ -587,3 +611,68 @@ def misionVision(request):
 def cronograma_eventos(request):
     eventos = Evento.objects.filter(es_favorito=True).order_by('-fecha_inicio') 
     return render(request, 'bases/landing/otros/cronograma.html', {'eventos': eventos})
+
+# ------------------
+
+# PDF
+
+# views.py
+
+
+
+def generar_pdf_usuarios(request):
+    usuarios = Usuario.objects.all().select_related(
+        'identificacion', 'genero', 'estadoCivil', 'escolaridad', 'profesion'
+    )
+
+    html_string = render_to_string('usuarios/listar_pdf.html', {'usuarios': usuarios})
+    html = HTML(string=html_string)
+    result = html.write_pdf()
+
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="usuarios.pdf"'
+    response.write(result)
+    return response
+
+def generar_pdf_asistencias_evento(request, evento_id):
+    evento = get_object_or_404(Evento, pk=evento_id)
+    
+    # Obtener todas las asistencias para el evento específico
+    usuarios_eventos = UsuarioEvento.objects.filter(evento=evento).select_related('usuario')
+
+    # Calcular las fechas del evento
+    duracion_dias = (evento.fecha_fin - evento.fecha_inicio).days + 1
+    fechas_evento = [(evento.fecha_inicio + timedelta(days=i)).strftime('%Y-%m-%d') for i in range(duracion_dias)]
+
+    # Agrupar asistencias por usuario
+    asistencias_por_usuario = {}
+    for usuario_evento in usuarios_eventos:
+        usuario = usuario_evento.usuario
+        if usuario not in asistencias_por_usuario:
+            # Inicializamos con todas las fechas en 'No Asistió'
+            asistencias_por_usuario[usuario] = {'asistencias': [False] * len(fechas_evento), 'faltas': 0}
+        
+        # Marcamos las asistencias reales
+        fecha_asistencia_str = usuario_evento.fecha_asistencia.strftime('%Y-%m-%d')
+        if fecha_asistencia_str in fechas_evento:
+            index = fechas_evento.index(fecha_asistencia_str)
+            asistencias_por_usuario[usuario]['asistencias'][index] = usuario_evento.asistencia  # True si asistió, False si no
+    
+    # Contamos las veces que faltó cada usuario
+    for usuario, data in asistencias_por_usuario.items():
+        data['faltas'] = data['asistencias'].count(False)  # Cuenta los 'False' en la lista de asistencias
+
+    context = {
+        'evento': evento,
+        'asistencias_por_usuario': asistencias_por_usuario.items(),
+        'fechas_evento': fechas_evento,
+    }
+
+    html_string = render_to_string('eventos/asistencias/listar_filtro_pdf.html', context)
+    html = HTML(string=html_string)
+    result = html.write_pdf()
+
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="{evento.nombre}_asistencias.pdf"'
+    response.write(result)
+    return response

@@ -8,6 +8,7 @@
 <table class="table table-hover fs-6 table-responsive miTabla table-bordered text-center">
     <thead>
         <tr>
+            <th class="text-center">#</th>
             <th class="text-center">Nombre Completo</th>
             <th class="text-center">Evento</th>
             <th class="text-center">Fecha de Asistencia</th>
@@ -18,6 +19,7 @@
     <tbody>
         {% for usuario_evento in usuarios_eventos %}
             <tr>
+                <td>{{ forloop.counter }}</td>
                 <td>{{ usuario_evento.usuario }}</td>
                 <td>{{ usuario_evento.evento }}</td>
                 <td>{{ usuario_evento.fecha_asistencia }}</td>

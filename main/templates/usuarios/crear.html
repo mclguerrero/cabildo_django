@@ -31,6 +31,15 @@
             {% endif %}
         </div>
         <div class="mb-3">
+            {{ form.zona.label_tag }} 
+            {{ form.zona }}
+            {% if form.zona.errors %}
+                <div class="alert alert-danger mt-3">
+                    {{ form.zona.errors }}
+                </div>
+            {% endif %}
+        </div>
+        <div class="mb-3">
             {{ form.fecha_nacimiento.label_tag }} 
             {{ form.fecha_nacimiento }}
             {% if form.fecha_nacimiento.errors %}
@@ -89,11 +98,11 @@
             {% endif %}
         </div>
         <div class="mb-3">
-            {{ form.parentesco.label_tag }} 
-            {{ form.parentesco }}
-            {% if form.parentesco.errors %}
+            {{ form.localidad.label_tag }} 
+            {{ form.localidad }}
+            {% if form.localidad.errors %}
                 <div class="alert alert-danger mt-3">
-                    {{ form.parentesco.errors }}
+                    {{ form.zona.errors }}
                 </div>
             {% endif %}
         </div>
@@ -136,9 +145,34 @@
 
 </form>
 
+<script>
+    $(document).ready(function(){
+        $('#zona-select').change(function(){
+            var zonaId = $(this).val();
+            $.ajax({
+                url: '{% url "get_localidades" %}',
+                data: {
+                    'zona': zonaId
+                },
+                success: function(data){
+                    $('#localidad-select').empty(); // Limpia el dropdown de localidades
+                    $.each(data, function(index, localidad) {
+                        $('#localidad-select').append($('<option></option>').attr('value', localidad.id).text(localidad.nombre));
+                    });
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error en la solicitud AJAX:', error);
+                }
+            });
+        });
+    });
+</script>
+
+
 {% endblock %}
 {% block content %}
   {% with container_class="w-50" %}
     {{ block.super }}
   {% endwith %}
 {% endblock %}
+
